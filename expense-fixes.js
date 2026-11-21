@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  // Preserve custom split amounts while the main app rebuilds participant controls.
+  // Keep custom split amounts while the main app rebuilds participant controls.
   const splitValues = new Map();
   const expenseDialog = document.querySelector('#expenseDialog');
   const rememberSplitValues = () => document.querySelectorAll('#customSplitFields .custom-amount').forEach(input => {
@@ -27,7 +27,10 @@
   const categories = ['餐飲', '交通', '居家', '購物', '娛樂', '醫療', '學習', '其他'];
   const money = new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD', maximumFractionDigits: 2 });
   const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[char]);
-  const currentMonth = () => new Date().toISOString().slice(0, 7);
+  const currentMonth = () => {
+    const date = new Date();
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  };
   const today = () => {
     const date = new Date();
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -87,7 +90,7 @@
     section.innerHTML = `
       <div class="personal-intro"><div><span class="section-kicker">YOUR MONTHLY MONEY</span><h2 id="personalLedgerTitle">個人帳目管理</h2><p>記下自己的日常支出，掌握每月花費與預算。</p></div><span class="personal-intro-icon" aria-hidden="true">＄</span></div>
       <section class="surface personal-toolbar"><label for="personalMonth">查看月份</label><input id="personalMonth" type="month"><button id="addPersonalExpense" class="button button-primary" type="button">＋ 記錄支出</button></section>
-      <form id="personalBudgetForm" class="surface personal-budget"><div><span class="section-kicker">MONTHLY BUDGET</span><h3>設定本月支出預算</h3><p>預算只作為個人追蹤，不影響分帳群組結算。</p></div><label class="budget-input-label" for="personalBudgetInput">每月預算（NT$）<span><input id="personalBudgetInput" type="number" min="0" step="0.01" inputmode="decimal" placeholder="例如 30000"></span></label><button class="button button-secondary" type="submit">儲存預算</button></section>
+      <form id="personalBudgetForm" class="surface personal-budget"><div><span class="section-kicker">MONTHLY BUDGET</span><h3>設定本月支出預算</h3><p>預算只作為個人追蹤，不影響分帳群組結算。</p></div><label class="budget-input-label" for="personalBudgetInput">每月預算（NT$）<span><input id="personalBudgetInput" type="number" min="0" step="100" inputmode="numeric" placeholder="例如 30000" aria-describedby="personalBudgetStepHint"></span><small id="personalBudgetStepHint" class="budget-step-hint">使用上下鍵以 NT$100 為單位調整</small></label><button class="button button-secondary" type="submit">儲存預算</button></form>
       <div id="personalStats" class="personal-stats"></div>
       <section class="surface personal-expenses"><div class="section-heading"><div><span class="section-kicker">MONTHLY RECORDS</span><h3 id="personalMonthHeading">本月支出明細</h3></div><span id="personalExpenseCount" class="personal-count"></span></div><div id="personalExpenseList"></div></section>
       <dialog id="personalExpenseDialog" class="app-dialog"><form id="personalExpenseForm" method="dialog"><div class="dialog-heading"><div><span class="section-kicker">PERSONAL EXPENSE</span><h2 id="personalExpenseDialogTitle">記錄個人支出</h2></div><button class="dialog-close" type="button" data-personal-close aria-label="關閉">×</button></div><input id="personalExpenseId" type="hidden"><label class="field-label" for="personalTitle">支出項目</label><input id="personalTitle" class="text-input" maxlength="70" placeholder="例如：午餐" required><div class="personal-form-grid"><div><label class="field-label" for="personalAmount">金額（NT$）</label><input id="personalAmount" class="text-input" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0" required></div><div><label class="field-label" for="personalDate">日期</label><input id="personalDate" class="text-input" type="date" required></div></div><label class="field-label" for="personalCategory">支出分類</label><select id="personalCategory" class="text-input">${categories.map(item => `<option>${item}</option>`).join('')}</select><label class="field-label" for="personalNote">備註 <span class="field-hint">選填</span></label><input id="personalNote" class="text-input" maxlength="160" placeholder="補充說明"><div id="personalExpenseError" class="error-message" role="alert"></div><div class="dialog-actions"><button class="button button-secondary" type="button" data-personal-close>取消</button><button class="button button-primary" type="submit">儲存支出</button></div></form></dialog>`;
